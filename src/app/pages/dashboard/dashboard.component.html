@@ -1,0 +1,202 @@
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl w-full">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
+      <p class="text-base text-gray-600">
+        Bienvenido de vuelta, Juan. Aquí tienes un resumen de tu actividad eco-friendly.
+      </p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid mb-8">
+      <div *ngFor="let stat of stats" class="stat-item bg-white rounded-xl shadow p-4">
+        <div class="flex items-center justify-center mb-2">
+          <div [ngClass]="stat.bgColor" class="w-10 h-10 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path [attr.d]="stat.icon"></path>
+            </svg>
+          </div>
+        </div>
+        <p class="stat-value">{{ stat.value }}</p>
+        <p class="stat-label">{{ stat.label }}</p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Main content (col-span-2) -->
+      <div class="md:col-span-2 space-y-8">
+
+        <!-- Acciones rápidas -->
+        <div class="card">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Acciones Rápidas</h2>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <button *ngFor="let action of quickActions"
+                    [routerLink]="action.route"
+                    class="w-full border border-gray-200 rounded-lg p-4 text-left hover:border-green-500 transition-colors">
+              <div class="flex items-center gap-3">
+                <div [ngClass]="action.bgColor" class="w-10 h-10 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path [attr.d]="action.icon"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-900">{{ action.title }}</p>
+                  <p class="text-sm text-gray-600">{{ action.description }}</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="card">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Actividad Reciente</h2>
+          </div>
+          <div class="divide-y divide-gray-200">
+            <div *ngFor="let activity of recentActivity" class="py-3 flex items-center">
+              <div [ngClass]="activity.bgColor" class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path [attr.d]="activity.icon"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-900">{{ activity.title }}</p>
+                <p class="text-sm text-gray-600">{{ activity.description }}</p>
+              </div>
+              <div class="text-sm text-gray-600 whitespace-nowrap">{{ activity.time }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-8">
+
+        <!-- Puntos -->
+        <div class="bg-white rounded-xl shadow p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <p class="text-sm text-gray-600">Puntos Totales</p>
+              <p class="text-3xl font-bold text-green-600 tabular-nums">1,250</p>
+            </div>
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+            </div>
+          </div>
+          <button routerLink="/rewards" class="btn btn-primary w-full">Ver Recompensas</button>
+        </div>
+
+        <!-- Próxima recolección -->
+        <div class="bg-white rounded-xl shadow p-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Próxima Recolección</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Fecha</span>
+              <span class="font-medium">15 Dic, 2024</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Tipo</span>
+              <span class="points-badge">Reciclables</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Horario</span>
+              <span class="font-medium">9:00 - 11:00 AM</span>
+            </div>
+          </div>
+          <button routerLink="/schedule" class="btn btn-primary w-full mt-4">Modificar</button>
+        </div>
+
+        <!-- Impacto ambiental -->
+        <div class="bg-white rounded-xl shadow p-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Impacto Ambiental</h3>
+          <div class="space-y-3">
+            <div *ngFor="let impact of environmentalImpact" class="space-y-1">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span [ngClass]="impact.color" class="w-4 h-4 rounded"></span>
+                  <p class="text-sm text-gray-900 font-medium">{{ impact.label }}</p>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 tabular-nums">{{ impact.value }}</p>
+              </div>
+              <div class="w-full h-4 bg-gray-50 rounded">
+                <div [ngClass]="impact.color" class="h-4 rounded" [style.width.%]="impact.percentage"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Points Card -->
+        <div class="points-card">
+          <div class="points-header">
+            <div class="points-info">
+              <p class="points-label">Puntos Totales</p>
+              <p class="points-value">1,250</p>
+            </div>
+            <div class="points-icon-container">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+              </svg>
+            </div>
+          </div>
+          <button routerLink="/rewards" class="points-button">
+            Ver Recompensas
+          </button>
+        </div>
+
+        <!-- Next Collection -->
+        <div class="collection-card">
+          <h3 class="collection-title">Próxima Recolección</h3>
+          <div class="collection-details">
+            <div class="collection-row">
+              <span class="collection-label">Fecha</span>
+              <span class="collection-value">15 Dic, 2024</span>
+            </div>
+            <div class="collection-row">
+              <span class="collection-label">Tipo</span>
+              <span class="collection-badge">
+                Reciclables
+              </span>
+            </div>
+            <div class="collection-row">
+              <span class="collection-label">Horario</span>
+              <span class="collection-value">9:00 - 11:00 AM</span>
+            </div>
+          </div>
+          <button routerLink="/schedule" class="collection-button">
+            Modificar
+          </button>
+        </div>
+
+        <!-- Environmental Impact -->
+        <div class="impact-card">
+          <h3 class="collection-title">Impacto Ambiental</h3>
+          <div class="impact-list">
+            <div *ngFor="let impact of environmentalImpact" class="impact-item">
+              <div [ngClass]="impact.color" class="impact-indicator"></div>
+              <div class="impact-content">
+                <div class="impact-header">
+                  <p class="impact-label">{{ impact.label }}</p>
+                  <p class="impact-value">{{ impact.value }}</p>
+                </div>
+                <div class="impact-progress">
+                  <div [ngClass]="impact.color" class="impact-bar" [style.width.%]="impact.percentage"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

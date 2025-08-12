@@ -1,0 +1,78 @@
+<div class="min-h-screen">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Gestión Inteligente de 
+          <span class="hero-highlight">Residuos Domésticos</span>
+        </h1>
+        <p class="hero-subtitle">
+          Contribuye al medio ambiente mientras ganas puntos. 
+          Programa recolecciones, obtén recompensas y ayuda a crear un futuro más sostenible.
+        </p>
+        <div class="hero-buttons">
+          <button routerLink="/register" class="btn-primary" aria-label="Ir a registro">
+            Comenzar Ahora
+          </button>
+          <button routerLink="/dashboard" class="btn-secondary" aria-label="Ver dashboard">
+            Ver Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">¿Cómo Funciona?</h2>
+        <p class="section-subtitle">
+          Un proceso simple y efectivo para gestionar tus residuos domésticos
+        </p>
+      </div>
+      
+      <div class="features-grid">
+        <div *ngFor="let feature of features; trackBy: trackByFeature" class="feature-card">
+          <div class="feature-icon">
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path [attr.d]="feature.icon"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-20 bg-green-50">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Nuestro Impacto</h2>
+      </div>
+      
+      <div class="stats-grid">
+        <div *ngFor="let stat of stats; trackBy: trackByStat" class="stat-item">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-container">
+      <h2 class="cta-title">¿Listo para Comenzar?</h2>
+      <p class="cta-subtitle">
+        Únete a miles de familias que ya están contribuyendo al medio ambiente
+      </p>
+      <button routerLink="/register" class="btn-primary" aria-label="Registrarse gratis">
+        Registrarse Gratis
+      </button>
+    </div>
+  </section>
+</div>

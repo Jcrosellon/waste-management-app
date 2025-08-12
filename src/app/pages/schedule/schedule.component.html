@@ -1,0 +1,188 @@
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl w-full grid md:grid-cols-3 gap-8">
+
+    <!-- Formulario -->
+    <div class="md:col-span-2 bg-white rounded-xl shadow-lg p-6">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-900">Programar Recolección</h2>
+        <p class="text-base text-gray-600">Agenda la recolección de tus residuos domésticos</p>
+      </div>
+
+      <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+        <!-- Tipo de Residuo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Residuo</label>
+          <div class="grid grid-cols-2 gap-4">
+            <div *ngFor="let type of wasteTypes" (click)="selectWasteType(type.id)"
+              class="border rounded-lg p-4 cursor-pointer hover:border-green-500 transition-colors"
+              [ngClass]="scheduleForm.get('wasteType')?.value === type.id ? 'border-green-600 shadow-lg' : 'border-gray-200'">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
+                  <img [src]="type.image" [alt]="type.name" class="w-full h-full object-cover">
+
+                </div>
+                <div>
+                  <h3 class="font-semibold text-gray-900">{{ type.name }}</h3>
+                  <p class="text-sm text-gray-600">{{ type.description }}</p>
+                  <span [ngClass]="type.pointsColor" class="points-badge text-sm">
+                    +{{ type.points }} puntos
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div *ngIf="scheduleForm.get('wasteType')?.invalid && scheduleForm.get('wasteType')?.touched"
+            class="text-sm text-red-500 mt-1">
+            Selecciona un tipo de residuo
+          </div>
+        </div>
+
+        <!-- Cantidad Estimada -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad Estimada (kg)</label>
+          <input type="number" formControlName="estimatedWeight" min="1" max="100" class="form-input"
+            [class.error]="scheduleForm.get('estimatedWeight')?.invalid && scheduleForm.get('estimatedWeight')?.touched">
+          <div *ngIf="scheduleForm.get('estimatedWeight')?.invalid && scheduleForm.get('estimatedWeight')?.touched"
+            class="text-sm text-red-500 mt-1">
+            <span *ngIf="scheduleForm.get('estimatedWeight')?.errors?.['required']">La cantidad es requerida</span>
+            <span *ngIf="scheduleForm.get('estimatedWeight')?.errors?.['min']">La cantidad mínima es 1kg</span>
+            <span *ngIf="scheduleForm.get('estimatedWeight')?.errors?.['max']">La cantidad máxima es 100kg</span>
+          </div>
+        </div>
+
+        <!-- Fecha y Hora -->
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Preferida</label>
+            <input type="date" formControlName="preferredDate" [min]="minDate" class="form-input"
+              [class.error]="scheduleForm.get('preferredDate')?.invalid && scheduleForm.get('preferredDate')?.touched">
+            <div *ngIf="scheduleForm.get('preferredDate')?.invalid && scheduleForm.get('preferredDate')?.touched"
+              class="text-sm text-red-500 mt-1">
+              La fecha es requerida
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Horario Preferido</label>
+            <select formControlName="preferredTime" class="form-input"
+              [class.error]="scheduleForm.get('preferredTime')?.invalid && scheduleForm.get('preferredTime')?.touched">
+              <option value="">Seleccionar horario</option>
+              <option *ngFor="let time of timeSlots" [value]="time.value">{{ time.label }}</option>
+            </select>
+            <div *ngIf="scheduleForm.get('preferredTime')?.invalid && scheduleForm.get('preferredTime')?.touched"
+              class="text-sm text-red-500 mt-1">
+              El horario es requerido
+            </div>
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Dirección de Recolección</label>
+          <textarea formControlName="address" rows="3" placeholder="Ingresa la dirección completa" class="form-input"
+            [class.error]="scheduleForm.get('address')?.invalid && scheduleForm.get('address')?.touched"></textarea>
+          <div *ngIf="scheduleForm.get('address')?.invalid && scheduleForm.get('address')?.touched"
+            class="text-sm text-red-500 mt-1">
+            La dirección es requerida
+          </div>
+        </div>
+
+        <!-- Instrucciones Especiales -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Instrucciones Especiales (Opcional)</label>
+          <textarea formControlName="specialInstructions" rows="3"
+            placeholder="Ej: Bolsas verdes junto a la puerta principal" class="form-input"></textarea>
+        </div>
+
+        <!-- Opciones Adicionales -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Opciones Adicionales</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" formControlName="notifyBeforeCollection" class="checkbox-input">
+              <span>Notificarme 30 minutos antes</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" formControlName="recurringCollection" class="checkbox-input">
+              <span>Recolección recurrente (semanal)</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" formControlName="ecoFriendlyPackaging" class="checkbox-input">
+              <span>Embalaje eco-friendly (+10 puntos)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <button type="submit" [disabled]="scheduleForm.invalid || isSubmitting" class="btn btn-primary w-full">
+          <span *ngIf="!isSubmitting">Programar Recolección</span>
+          <span *ngIf="isSubmitting" class="inline-flex items-center gap-2">
+            <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0..."></path>
+            </svg>
+            Programando...
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Información -->
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <h3 class="text-lg font-semibold mb-3">Información Importante</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li>Las recolecciones se realizan de lunes a sábado</li>
+          <li>Confirmaremos tu cita 24 horas antes</li>
+          <li>Ganas puntos por cada recolección exitosa</li>
+          <li>Servicio gratuito si separas correctamente</li>
+        </ul>
+      </div>
+
+      <!-- Próximas Recolecciones -->
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <h3 class="text-lg font-semibold mb-3">Próximas Recolecciones</h3>
+        <div class="space-y-2">
+          <div *ngFor="let collection of upcomingCollections"
+            class="flex items-center justify-between border-b border-gray-200 pb-2">
+            <div>
+              <p class="font-medium">{{ collection.type }}</p>
+              <p class="text-sm text-gray-600">{{ collection.date }} - {{ collection.time }}</p>
+            </div>
+            <span [ngClass]="collection.statusColor" class="px-3 py-1 rounded-full text-xs font-medium">
+              {{ collection.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <div class="bg-white rounded-xl shadow-lg p-4">
+        <h3 class="text-lg font-semibold mb-1">¿Necesitas Ayuda?</h3>
+        <p class="text-sm text-gray-600 mb-3">Nuestro equipo está disponible para asistirte</p>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-sm">
+            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z">
+              </path>
+            </svg>
+            +1 (555) 123-4567
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <!-- Email -->
+            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+            </svg>
+            soporte&#64;ecowaste.com
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
