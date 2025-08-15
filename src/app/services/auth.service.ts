@@ -57,6 +57,15 @@ export class AuthService {
     this.tokenSubject.next(null)
   }
 
+  forgotPassword(email: string) {
+    return this.http.post<any>('/api/usuarios/forgot-password', { email });
+  }
+
+  resetPassword(token: string, newPassword: string) {
+    return this.http.post<any>('/api/usuarios/reset-password', { token, newPassword });
+  }
+
+
   refreshUserData(): Observable<Usuario> {
     return this.http.get<Usuario>(`${this.apiUrl}/Usuarios/perfil`).pipe(
       tap((user) => {

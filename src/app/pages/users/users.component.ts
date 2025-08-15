@@ -58,38 +58,95 @@ export class UsersComponent implements OnInit {
         this.loadUsuarios()
     }
 
-    loadUsuarios() {
-        this.loading = true
-        this.error = ""
+   loadUsuarios() {
+  this.loading = true;
+  this.error = "";
 
-        const filters: UsuarioFilters = {
-            ...this.searchForm.value,
-            pageNumber: this.currentPage,
-            pageSize: this.pageSize,
-        }
+  const filters: UsuarioFilters = {
+    ...this.searchForm.value,
+    pageNumber: this.currentPage,
+    pageSize: this.pageSize,
+  };
 
-        // Limpiar filtros vacíos
-        Object.keys(filters).forEach((key) => {
-            if (!filters[key as keyof UsuarioFilters]) {
-                delete filters[key as keyof UsuarioFilters]
-            }
-        })
-
-        this.usuarioService.getUsuarios(filters).subscribe({
-            next: (response) => {
-                this.usuarios = response.data.items
-                this.filteredUsuarios = this.usuarios
-                this.totalCount = response.data.totalCount
-                this.totalPages = response.data.totalPages
-                this.loading = false
-            },
-            error: (error) => {
-                this.error = "Error al cargar usuarios"
-                this.loading = false
-                console.error("Error:", error)
-            },
-        })
+  Object.keys(filters).forEach((key) => {
+    if (!filters[key as keyof UsuarioFilters]) {
+      delete filters[key as keyof UsuarioFilters];
     }
+  });
+
+  this.usuarioService.getUsuarios(filters).subscribe({
+    next: (response) => {
+      // 🔽 Normalización de la fecha antes de asignar a this.usuarios
+      this.usuarios = (response?.data?.items ?? []).map((u: any) => {
+        const raw =
+          u.fechaRegistro ??
+          u.createdAt ??
+          u.fecha_registro ??
+          u.registeredAt ??
+          u.registrationDate ??
+          null;
+
+        return {
+          ...u,
+          // Soporta ISO string, timestamp (ms o s), y strings dd/MM/yyyy
+          fechaRegistro: this.normalizeDate(raw),
+        };
+      });
+
+      this.filteredUsuarios = this.usuarios;
+      this.totalCount = response?.data?.totalCount ?? this.usuarios.length;
+      this.totalPages = response?.data?.totalPages ?? 1;
+      this.loading = false;
+    },
+    error: (error) => {
+      this.error = "Error al cargar usuarios";
+      this.loading = false;
+      console.error("Error:", error);
+    },
+  });
+}
+
+/** Util para convertir distintos formatos a Date o null */
+private normalizeDate(raw: any): Date | null {
+  if (!raw && raw !== 0) return null;
+
+  // Si ya es Date
+  if (raw instanceof Date && !isNaN(raw.valueOf())) return raw;
+
+  // Número: timestamp (milisegundos o segundos)
+  if (typeof raw === "number") {
+    // Heurística: si es muy chico, asume segundos
+    const ms = raw < 10_000_000_000 ? raw * 1000 : raw;
+    const d = new Date(ms);
+    return isNaN(d.valueOf()) ? null : d;
+  }
+
+  // String ISO-8601 o similar -> Date lo parsea bien
+  if (typeof raw === "string") {
+    // Caso típico no-ISO "dd/MM/yyyy"
+    const ddMmYyyy = /^(\d{2})\/(\d{2})\/(\d{4})(?: (\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+    const m = raw.match(ddMmYyyy);
+    if (m) {
+      const [, dd, mm, yyyy, hh = "00", mi = "00", ss = "00"] = m;
+      const d = new Date(
+        Number(yyyy),
+        Number(mm) - 1,
+        Number(dd),
+        Number(hh),
+        Number(mi),
+        Number(ss),
+      );
+      return isNaN(d.valueOf()) ? null : d;
+    }
+
+    // Intento general (ISO, "yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-dd HH:mm:ss", etc.)
+    const guess = new Date(raw.replace(" ", "T"));
+    return isNaN(guess.valueOf()) ? null : guess;
+  }
+
+  return null;
+}
+
 
     onSearch() {
         this.currentPage = 1

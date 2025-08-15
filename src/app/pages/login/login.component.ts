@@ -96,9 +96,10 @@ import { AuthService } from '../../services/auth.service';
         <div class="text-center">
           <p class="text-sm text-gray-600">
             ¿Olvidaste tu contraseña? 
-            <a href="#" class="font-medium text-green-600 hover:text-green-500">
-              Recuperar contraseña
-            </a>
+            <a routerLink="/forgot-password" class="font-medium text-green-600 hover:text-green-500">
+  Recuperar contraseña
+</a>
+
           </p>
         </div>
       </div>
