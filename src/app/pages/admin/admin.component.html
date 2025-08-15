@@ -1,0 +1,125 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <h1 class="admin-title">Panel de Administración</h1>
+      <p class="admin-subtitle">Gestiona todos los aspectos del sistema EcoWaste</p>
+      <button 
+        (click)="refreshStats()" 
+        class="refresh-btn"
+        [disabled]="loading">
+        <span class="refresh-icon">↻</span>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando estadísticas administrativas...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-message">
+      <span class="error-icon">⚠️</span>
+      {{ error }}
+    </div>
+    <button (click)="refreshStats()" class="retry-btn">Reintentar</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error" class="admin-content">
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon users-icon">👥</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ stats.totalUsuarios }}</h3>
+          <p class="stat-label">Total Usuarios</p>
+          <span class="stat-detail">{{ stats.usuariosActivos }} activos</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon collections-icon">🗂️</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ stats.totalRecolecciones }}</h3>
+          <p class="stat-label">Total Recolecciones</p>
+          <span class="stat-detail">{{ stats.recoleccionesHoy }} hoy</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon points-icon">⭐</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ stats.totalPuntos | number }}</h3>
+          <p class="stat-label">Puntos Totales</p>
+          <span class="stat-detail">{{ stats.totalCanjes }} canjes</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon notifications-icon">🔔</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ stats.notificacionesPendientes }}</h3>
+          <p class="stat-label">Notificaciones</p>
+          <span class="stat-detail">{{ stats.descuentosActivos }} descuentos activos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Modules -->
+    <div class="modules-section">
+      <h2 class="modules-title">Módulos de Administración</h2>
+      <div class="modules-grid">
+        <a 
+          *ngFor="let module of adminModules" 
+          [routerLink]="module.route"
+          class="module-card"
+          [class]="'module-' + module.color">
+          <div class="module-icon" [class]="'icon-' + module.color">
+            <span [ngSwitch]="module.icon">
+              <span *ngSwitchCase="'users'">👥</span>
+              <span *ngSwitchCase="'chart'">📊</span>
+              <span *ngSwitchCase="'discount'">🎫</span>
+              <span *ngSwitchCase="'bell'">🔔</span>
+              <span *ngSwitchCase="'settings'">⚙️</span>
+              <span *ngSwitchCase="'dashboard'">📈</span>
+              <span *ngSwitchDefault>📋</span>
+            </span>
+          </div>
+          <div class="module-content">
+            <h3 class="module-title">{{ module.title }}</h3>
+            <p class="module-description">{{ module.description }}</p>
+          </div>
+          <div class="module-arrow">→</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2 class="actions-title">Acciones Rápidas</h2>
+      <div class="actions-grid">
+        <button class="action-btn primary" routerLink="/register">
+          <span class="action-icon">➕</span>
+          Crear Usuario
+        </button>
+        <button class="action-btn secondary" routerLink="/discounts">
+          <span class="action-icon">🎫</span>
+          Nuevo Descuento
+        </button>
+        <button class="action-btn tertiary" routerLink="/notifications">
+          <span class="action-icon">📢</span>
+          Enviar Notificación
+        </button>
+        <button class="action-btn quaternary" routerLink="/reports">
+          <span class="action-icon">📊</span>
+          Generar Reporte
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,170 @@
+<div class="notifications-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Notificaciones</h1>
+    <div class="header-actions" *ngIf="isAdmin$ | async">
+      <button 
+        class="btn btn-primary"
+        (click)="mostrarFormulario = !mostrarFormulario">
+        {{ mostrarFormulario ? 'Cancelar' : 'Enviar Notificación' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulario para enviar notificaciones (solo admin) -->
+  <div class="notification-form" *ngIf="mostrarFormulario && (isAdmin$ | async)">
+    <div class="card">
+      <div class="card-header">
+        <h3>Enviar Nueva Notificación</h3>
+      </div>
+      <div class="card-content">
+        <form (ngSubmit)="enviarNotificacion()" #notifForm="ngForm">
+          <div class="form-group">
+            <label for="usuarioId">ID Usuario:</label>
+            <input 
+              type="number" 
+              id="usuarioId"
+              [(ngModel)]="nuevaNotificacion.usuarioId"
+              name="usuarioId"
+              class="form-input"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="tipo">Tipo:</label>
+            <select 
+              id="tipo"
+              [(ngModel)]="nuevaNotificacion.tipo"
+              name="tipo"
+              class="form-select">
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Sistema">Sistema</option>
+              <option value="Email">Email</option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="nuevaNotificacion.tipo === 'WhatsApp'">
+            <label for="telefono">Teléfono:</label>
+            <input 
+              type="tel" 
+              id="telefono"
+              [(ngModel)]="nuevaNotificacion.telefono"
+              name="telefono"
+              class="form-input"
+              placeholder="+573001234567">
+          </div>
+
+          <div class="form-group">
+            <label for="mensaje">Mensaje:</label>
+            <textarea 
+              id="mensaje"
+              [(ngModel)]="nuevaNotificacion.mensaje"
+              name="mensaje"
+              class="form-textarea"
+              rows="4"
+              required></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="loading || !notifForm.form.valid">
+              {{ loading ? 'Enviando...' : 'Enviar Notificación' }}
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-secondary"
+              (click)="testWhatsApp()"
+              *ngIf="nuevaNotificacion.tipo === 'WhatsApp'"
+              [disabled]="loading">
+              Probar WhatsApp
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="filtroTipo">Tipo:</label>
+        <select id="filtroTipo" [(ngModel)]="filtroTipo" class="form-select">
+          <option value="Todos">Todos</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Sistema">Sistema</option>
+          <option value="Email">Email</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filtroEstado">Estado:</label>
+        <select id="filtroEstado" [(ngModel)]="filtroEstado" class="form-select">
+          <option value="Todos">Todos</option>
+          <option value="Enviado">Enviado</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Error">Error</option>
+        </select>
+      </div>
+
+      <button class="btn btn-secondary" (click)="cargarNotificaciones()">
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Cargando notificaciones...</p>
+  </div>
+
+  <!-- Lista de Notificaciones -->
+  <div class="notifications-list" *ngIf="!loading">
+    <div class="card" *ngFor="let notificacion of notificacionesFiltradas; trackBy: trackByNotificacion">
+      <div class="notification-item">
+        <div class="notification-header">
+          <div class="notification-type">
+            <span class="type-icon">{{ getTipoIcon(notificacion.tipo) }}</span>
+            <span class="type-text">{{ notificacion.tipo }}</span>
+          </div>
+          <div class="notification-status">
+            <span class="status-badge" [ngClass]="getEstadoClass(notificacion.estado)">
+              {{ notificacion.estado }}
+            </span>
+          </div>
+        </div>
+
+        <div class="notification-content">
+          <p class="notification-message">{{ notificacion.mensaje }}</p>
+          <div class="notification-details">
+            <span class="notification-date">{{ formatearFecha(notificacion.fechaEnvio) }}</span>
+            <span class="notification-attempts" *ngIf="notificacion.intentos > 1">
+              • {{ notificacion.intentos }} intentos
+            </span>
+            <span class="notification-phone" *ngIf="notificacion.telefono">
+              • {{ notificacion.telefono }}
+            </span>
+          </div>
+          <div class="notification-error" *ngIf="notificacion.errorMensaje">
+            <strong>Error:</strong> {{ notificacion.errorMensaje }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="notificacionesFiltradas.length === 0">
+      <div class="empty-icon">🔔</div>
+      <h3>No hay notificaciones</h3>
+      <p>No se encontraron notificaciones con los filtros seleccionados.</p>
+    </div>
+  </div>
+</div>

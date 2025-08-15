@@ -1,0 +1,259 @@
+<div class="discounts-container">
+  <!-- Header -->
+  <div class="discounts-header">
+    <div class="header-content">
+      <h1 class="discounts-title">Gestión de Descuentos</h1>
+      <p class="discounts-subtitle">Administra los descuentos disponibles para canje de puntos</p>
+    </div>
+    <div class="header-actions" *ngIf="isAdmin$ | async">
+      <button 
+        (click)="showCreateForm = !showCreateForm" 
+        class="btn btn-primary"
+        [disabled]="loading"
+      >
+        <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        {{ showCreateForm ? 'Cancelar' : 'Nuevo Descuento' }}
+      </button>
+      <button (click)="loadDescuentos()" class="btn btn-secondary" [disabled]="loading">
+        <svg class="btn-icon" [class.spinning]="loading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Create/Edit Form -->
+  <div class="form-section" *ngIf="showCreateForm && (isAdmin$ | async)">
+    <div class="form-card">
+      <h3 class="form-title">
+        {{ editingDescuento ? 'Editar Descuento' : 'Crear Nuevo Descuento' }}
+      </h3>
+      
+      <form [formGroup]="createForm" (ngSubmit)="editingDescuento ? onUpdateDescuento() : onCreateDescuento()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="nombre" class="form-label">Nombre del Descuento</label>
+            <input 
+              type="text" 
+              id="nombre" 
+              formControlName="nombre" 
+              class="form-input"
+              placeholder="Ej: Descuento Eco-Friendly"
+            >
+            <div class="form-error" *ngIf="createForm.get('nombre')?.invalid && createForm.get('nombre')?.touched">
+              El nombre es requerido (mínimo 3 caracteres)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="puntosRequeridos" class="form-label">Puntos Requeridos</label>
+            <input 
+              type="number" 
+              id="puntosRequeridos" 
+              formControlName="puntosRequeridos" 
+              class="form-input"
+              placeholder="100"
+              min="1"
+            >
+            <div class="form-error" *ngIf="createForm.get('puntosRequeridos')?.invalid && createForm.get('puntosRequeridos')?.touched">
+              Los puntos requeridos deben ser mayor a 0
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="valorDescuento" class="form-label">Valor del Descuento</label>
+            <input 
+              type="number" 
+              id="valorDescuento" 
+              formControlName="valorDescuento" 
+              class="form-input"
+              placeholder="10"
+              min="0.01"
+              step="0.01"
+            >
+            <div class="form-error" *ngIf="createForm.get('valorDescuento')?.invalid && createForm.get('valorDescuento')?.touched">
+              El valor del descuento debe ser mayor a 0
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tipo de Descuento</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" formControlName="esPorcentaje" [value]="false">
+                <span class="radio-text">Monto fijo ($)</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" formControlName="esPorcentaje" [value]="true">
+                <span class="radio-text">Porcentaje (%)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+            <input 
+              type="date" 
+              id="fechaInicio" 
+              formControlName="fechaInicio" 
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="fechaFin" class="form-label">Fecha de Fin</label>
+            <input 
+              type="date" 
+              id="fechaFin" 
+              formControlName="fechaFin" 
+              class="form-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="cantidadDisponible" class="form-label">Cantidad Disponible</label>
+            <input 
+              type="number" 
+              id="cantidadDisponible" 
+              formControlName="cantidadDisponible" 
+              class="form-input"
+              placeholder="-1 para ilimitado"
+            >
+            <small class="form-help">Usa -1 para cantidad ilimitada</small>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea 
+              id="descripcion" 
+              formControlName="descripcion" 
+              class="form-textarea"
+              placeholder="Describe los términos y condiciones del descuento..."
+              rows="3"
+            ></textarea>
+            <div class="form-error" *ngIf="createForm.get('descripcion')?.invalid && createForm.get('descripcion')?.touched">
+              La descripción es requerida (mínimo 10 caracteres)
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="cancelEdit()" class="btn btn-secondary">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="createForm.invalid || loading">
+            {{ editingDescuento ? 'Actualizar' : 'Crear' }} Descuento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="error">
+    <div class="error-content">
+      <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading && descuentos.length === 0">
+    <div class="loading-spinner"></div>
+    <p>Cargando descuentos...</p>
+  </div>
+
+  <!-- Descuentos Grid -->
+  <div class="descuentos-grid" *ngIf="!loading || descuentos.length > 0">
+    <div class="descuento-card" *ngFor="let descuento of descuentos" [class]="getStatusClass(descuento)">
+      <div class="descuento-header">
+        <h3 class="descuento-title">{{ descuento.nombre }}</h3>
+        <span class="descuento-status" [class]="getStatusClass(descuento)">
+          {{ getStatusText(descuento) }}
+        </span>
+      </div>
+
+      <div class="descuento-content">
+        <p class="descuento-description">{{ descuento.descripcion }}</p>
+        
+        <div class="descuento-details">
+          <div class="detail-item">
+            <span class="detail-label">Puntos requeridos:</span>
+            <span class="detail-value points">{{ descuento.puntosRequeridos }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Descuento:</span>
+            <span class="detail-value discount">{{ formatDescuento(descuento) }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">Vigencia:</span>
+            <span class="detail-value">
+              {{ descuento.fechaInicio | date:'shortDate' }} - {{ descuento.fechaFin | date:'shortDate' }}
+            </span>
+          </div>
+          
+          <div class="detail-item" *ngIf="descuento.cantidadDisponible !== -1">
+            <span class="detail-label">Disponibles:</span>
+            <span class="detail-value">
+              {{ descuento.cantidadDisponible - descuento.cantidadCanjeada }} / {{ descuento.cantidadDisponible }}
+            </span>
+          </div>
+          
+          <div class="detail-item" *ngIf="descuento.cantidadDisponible === -1">
+            <span class="detail-label">Disponibles:</span>
+            <span class="detail-value">Ilimitado</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="descuento-actions" *ngIf="isAdmin$ | async">
+        <button 
+          (click)="onEditDescuento(descuento)" 
+          class="btn btn-sm btn-secondary"
+          [disabled]="loading"
+        >
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Editar
+        </button>
+        
+        <button 
+          (click)="onDeleteDescuento(descuento.id)" 
+          class="btn btn-sm btn-danger"
+          [disabled]="loading"
+        >
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && descuentos.length === 0 && !error">
+    <div class="empty-content">
+      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+      </svg>
+      <h3>No hay descuentos disponibles</h3>
+      <p>Aún no se han creado descuentos en el sistema.</p>
+      <button 
+        *ngIf="isAdmin$ | async" 
+        (click)="showCreateForm = true" 
+        class="btn btn-primary"
+      >
+        Crear Primer Descuento
+      </button>
+    </div>
+  </div>
+</div>

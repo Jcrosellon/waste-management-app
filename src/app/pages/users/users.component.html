@@ -1,0 +1,196 @@
+<div class="users-container">
+    <div class="page-header">
+        <h1 class="page-title">Gestión de Usuarios</h1>
+        <p class="page-subtitle">Administra usuarios, roles y permisos del sistema</p>
+    </div>
+
+    <!-- Filtros de búsqueda -->
+    <div class="search-section">
+        <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+            <div class="search-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" formControlName="nombre" placeholder="Buscar por nombre..."
+                        class="form-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" formControlName="email" placeholder="Buscar por email..."
+                        class="form-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="rol">Rol</label>
+                    <select id="rol" formControlName="rol" class="form-select">
+                        <option value="">Todos los roles</option>
+                        <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" [disabled]="loading">
+                        <span *ngIf="loading">Buscando...</span>
+                        <span *ngIf="!loading">Buscar</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="error" class="alert alert-error">
+        {{ error }}
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="table-section">
+        <div class="table-header">
+            <h2>Usuarios ({{ totalCount }})</h2>
+        </div>
+
+        <div class="table-container" *ngIf="!loading">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Puntos</th>
+                        <th>Estado</th>
+                        <th>Fecha Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let usuario of filteredUsuarios">
+                        <td>
+                            <div class="user-info">
+                                <div class="user-name">{{ usuario.nombre }}</div>
+                                <div class="user-phone" *ngIf="usuario.telefono">{{ usuario.telefono }}</div>
+                            </div>
+                        </td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="getRoleBadgeClass(usuario.rol)">
+                                {{ usuario.rol }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="points-display">{{ usuario.puntos }} pts</span>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="getStatusBadgeClass(usuario.activo)">
+                                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td>{{ usuario.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-secondary" (click)="editUser(usuario)"
+                                    title="Editar usuario">
+                                    Editar
+                                </button>
+                                <button class="btn btn-sm btn-danger" (click)="deactivateUser(usuario)"
+                                    [disabled]="!usuario.activo" title="Desactivar usuario">
+                                    Desactivar
+                                </button>
+                                <button *ngIf="!usuario.activo" class="btn btn-sm btn-success"
+                                    (click)="approveUser(usuario)" title="Aprobar usuario">
+                                    Aprobar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="loading" class="loading-state">
+            <p>Cargando usuarios...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loading && filteredUsuarios.length === 0" class="empty-state">
+            <p>No se encontraron usuarios con los filtros aplicados.</p>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination-section" *ngIf="totalPages > 1">
+        <div class="pagination">
+            <button class="btn btn-sm btn-secondary" (click)="onPageChange(currentPage - 1)"
+                [disabled]="currentPage === 1">
+                Anterior
+            </button>
+
+            <span class="page-info">
+                Página {{ currentPage }} de {{ totalPages }}
+            </span>
+
+            <button class="btn btn-sm btn-secondary" (click)="onPageChange(currentPage + 1)"
+                [disabled]="currentPage === totalPages">
+                Siguiente
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de edición -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Editar Usuario</h3>
+            <button class="modal-close" (click)="closeModal()">&times;</button>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="saveUser()" class="modal-body">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="edit-nombre">Nombre</label>
+                    <input type="text" id="edit-nombre" formControlName="nombre" class="form-input" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" formControlName="email" class="form-input" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-telefono">Teléfono</label>
+                    <input type="tel" id="edit-telefono" formControlName="telefono" class="form-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-direccion">Dirección</label>
+                    <input type="text" id="edit-direccion" formControlName="direccion" class="form-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-rol">Rol</label>
+                    <select id="edit-rol" formControlName="rol" class="form-select" required>
+                        <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" formControlName="activo" class="form-checkbox" />
+                        Usuario activo
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" (click)="closeModal()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,57 +1,119 @@
 <nav class="navbar" role="navigation" aria-label="Main navigation">
   <div class="navbar-container">
     <div class="navbar-content">
-      <!-- Brand + Nav -->
-      <div class="navbar-brand">
+
+      <!-- Brand + Botón hamburguesa -->
+      <div class="flex items-center justify-between w-full md:w-auto">
         <a routerLink="/" class="navbar-logo flex items-center" aria-label="EcoWaste inicio">
-          <div class="logo-icon">
-            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-            </svg>
-          </div>
           <span class="logo-text">EcoWaste</span>
         </a>
 
-        <div class="navbar-nav">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
-            Inicio
-          </a>
-          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
-            Dashboard
-          </a>
-          <a routerLink="/schedule" routerLinkActive="active" class="nav-link">
-            Programar
-          </a>
-          <a routerLink="/reports" routerLinkActive="active" class="nav-link">
-            Reportes
-          </a>
-          <a routerLink="/rewards" routerLinkActive="active" class="nav-link">
-            Recompensas
-          </a>
-        </div>
+        <!-- Botón hamburguesa visible solo en móvil -->
+        <button 
+  class="buttonAmb"
+  (click)="menuAbierto = !menuAbierto"
+  aria-label="Abrir menú"
+>
+  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+    <path fill-rule="evenodd"
+      d="M3 4a1 1 0 011-1h12a1 1 0 
+      110 2H4a1 1 0 01-1-1zm0 4a1 1 0 
+      011-1h12a1 1 0 110 2H4a1 1 0 
+      01-1-1zm0 4a1 1 0 011-1h12a1 1 0 
+      110 2H4a1 1 0 01-1-1z"
+      clip-rule="evenodd"></path>
+  </svg>
+</button>
+
+
+
       </div>
 
-      <!-- Actions (depende de auth) -->
-      <div class="navbar-actions">
-        <!-- Si está autenticado -->
-        <ng-container *ngIf="(authService.currentUser$ | async) as user; else guest">
-          <div class="points-badge" aria-label="Puntos acumulados">
-            <svg class="points-icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-            </svg>
-            <span class="points-text">{{ user?.puntos ?? 0 | number:'1.0-0' }} pts</span>
-          </div>
+      <!-- Navegación en escritorio -->
+      <div class="navbar-nav hidden md:flex" *ngIf="(authService.currentUser$ | async) as user">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
 
-          <a routerLink="/profile" class="profile-button" aria-label="Ir a mi perfil">
-            {{ user?.nombre || 'Mi Perfil' }}
-          </a>
-
-          <button type="button" class="btn btn-secondary" (click)="onLogout()" aria-label="Cerrar sesión">
-            Salir
-          </button>
+        <ng-container *ngIf="user.rol === 'Usuario'">
+          <a routerLink="/schedule" routerLinkActive="active" class="nav-link">Programar</a>
+          <a routerLink="/rewards" routerLinkActive="active" class="nav-link">Recompensas</a>
         </ng-container>
 
-        <!-- Invitado -->
+        <ng-container *ngIf="user.rol === 'Recolector' || user.rol === 'Administrador'">
+          <a routerLink="/reports" routerLinkActive="active" class="nav-link">Reportes</a>
+          <a routerLink="/notifications" routerLinkActive="active" class="nav-link">Notificaciones</a>
+        </ng-container>
+
+        <ng-container *ngIf="user.rol === 'Administrador'">
+          <a routerLink="/admin" routerLinkActive="active" class="nav-link">Administración</a>
+          <a routerLink="/users" routerLinkActive="active" class="nav-link">Usuarios</a>
+          <a routerLink="/discounts" routerLinkActive="active" class="nav-link">Descuentos</a>
+          <a routerLink="/configuration" routerLinkActive="active" class="nav-link">Configuración</a>
+        </ng-container>
+      </div>
+
+      <!-- Acciones (avatar, puntos, etc.) en escritorio -->
+      <div class="navbar-actions hidden md:flex">
+        <ng-container *ngIf="(authService.currentUser$ | async) as user; else guest">
+          <div class="points-badge" *ngIf="user.rol === 'Usuario'" aria-label="Puntos acumulados">
+            <svg class="points-icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 
+                00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 
+                00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 
+                1.118l-2.8-2.034a1 1 0 00-1.175 
+                0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 
+                1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 
+                1 0 00.951-.69l1.07-3.292z"></path>
+            </svg>
+            <span class="points-text">{{ user.puntos | number:'1.0-0' }} pts</span>
+          </div>
+
+          <div class="role-badge" *ngIf="user.rol !== 'Usuario'" [class]="'role-' + user.rol.toLowerCase()">
+            <span class="role-text">{{ user.rol }}</span>
+          </div>
+
+          <div class="user-dropdown" [class.open]="isDropdownOpen">
+            <button type="button" class="user-button" (click)="toggleDropdown()" aria-label="Menú de usuario">
+              <span class="avatar" aria-hidden="true">
+                <img *ngIf="user.fotoUrl; else initials" [src]="user.fotoUrl" alt="" />
+                <ng-template #initials>{{ getInitials(user.nombre) }}</ng-template>
+              </span>
+              <span class="user-meta">
+                <span class="user-name" title="{{ user.nombre }}">{{ user.nombre }}</span>
+                <span class="user-role">{{ user.rol }}</span>
+              </span>
+              <svg class="dropdown-icon" [class.rotate]="isDropdownOpen" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 
+                  0L10 10.586l3.293-3.293a1 1 0 
+                  111.414 1.414l-4 4a1 1 0 
+                  01-1.414 0l-4-4a1 1 0 
+                  010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+
+            <div class="dropdown-menu" *ngIf="isDropdownOpen">
+              <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+                <svg class="dropdown-item-icon" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 
+                    6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                </svg>
+                Mi Perfil
+              </a>
+
+              <button type="button" class="dropdown-item logout-item" (click)="onLogout()">
+                <svg class="dropdown-item-icon" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 
+                    102 0V4a1 1 0 00-1-1zm10.293 
+                    9.293a1 1 0 001.414 1.414l3-3a1 
+                    1 0 000-1.414l-3-3a1 1 0 
+                    00-1.414 1.414L14.586 9H7a1 1 0 
+                    100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
+                </svg>
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </ng-container>
+
         <ng-template #guest>
           <a routerLink="/login" class="btn btn-primary">Iniciar sesión</a>
           <a routerLink="/register" class="btn btn-secondary">Crear cuenta</a>
@@ -59,4 +121,33 @@
       </div>
     </div>
   </div>
+
+  <!-- Menú móvil -->
+  <ng-container *ngIf="menuAbierto">
+    <ng-container *ngIf="(authService.currentUser$ | async) as user">
+      <div class="md:hidden mt-4 space-y-2">
+        <a routerLink="/dashboard" class="nav-link block">Dashboard</a>
+
+        <ng-container *ngIf="user?.rol === 'Usuario'">
+          <a routerLink="/schedule" class="nav-link block">Programar</a>
+          <a routerLink="/rewards" class="nav-link block">Recompensas</a>
+        </ng-container>
+
+        <ng-container *ngIf="user?.rol === 'Recolector' || user?.rol === 'Administrador'">
+          <a routerLink="/reports" class="nav-link block">Reportes</a>
+          <a routerLink="/notifications" class="nav-link block">Notificaciones</a>
+        </ng-container>
+
+        <ng-container *ngIf="user?.rol === 'Administrador'">
+          <a routerLink="/admin" class="nav-link block">Administración</a>
+          <a routerLink="/users" class="nav-link block">Usuarios</a>
+          <a routerLink="/discounts" class="nav-link block">Descuentos</a>
+          <a routerLink="/configuration" class="nav-link block">Configuración</a>
+        </ng-container>
+      </div>
+    </ng-container>
+  </ng-container>
 </nav>
+
+<!-- Overlay -->
+<div class="dropdown-overlay" *ngIf="isDropdownOpen" (click)="closeDropdown()"></div>

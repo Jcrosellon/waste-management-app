@@ -1,0 +1,269 @@
+<div class="configuration-container">
+  <!-- Header -->
+  <div class="configuration-header">
+    <div class="header-content">
+      <h1 class="configuration-title">Configuración del Sistema</h1>
+      <p class="configuration-subtitle">Gestiona las configuraciones de zonas y reglas de validación</p>
+    </div>
+    <button (click)="loadData()" class="refresh-button" [disabled]="loading">
+      <svg class="refresh-icon" [class.spinning]="loading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando configuración...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-content">
+      <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3>Error al cargar configuración</h3>
+      <p>{{ error }}</p>
+      <button (click)="loadData()" class="retry-button">Reintentar</button>
+    </div>
+  </div>
+
+  <!-- Configuration Content -->
+  <div *ngIf="!loading && !error" class="configuration-content">
+    
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button 
+        (click)="setActiveTab('zonas')" 
+        [class.active]="activeTab === 'zonas'"
+        class="tab-button">
+        Configuración de Zonas
+      </button>
+      <button 
+        (click)="setActiveTab('reglas')" 
+        [class.active]="activeTab === 'reglas'"
+        class="tab-button">
+        Reglas de Validación
+      </button>
+    </div>
+
+    <!-- Zonas Tab -->
+    <div *ngIf="activeTab === 'zonas'" class="tab-content">
+      <div class="section-header">
+        <h2>Configuración de Zonas</h2>
+        <button (click)="toggleZonaForm()" class="primary-button">
+          <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Nueva Configuración
+        </button>
+      </div>
+
+      <!-- Zona Form -->
+      <div *ngIf="showZonaForm" class="form-container">
+        <form [formGroup]="zonaForm" (ngSubmit)="onSubmitZona()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="localidadId">Localidad</label>
+              <select id="localidadId" formControlName="localidadId" class="form-select">
+                <option value="">Seleccionar localidad</option>
+                <option *ngFor="let localidad of localidades" [value]="localidad.id">
+                  {{ localidad.nombre }} - {{ localidad.ciudad }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="tipoResiduoId">Tipo de Residuo</label>
+              <select id="tipoResiduoId" formControlName="tipoResiduoId" class="form-select">
+                <option value="">Seleccionar tipo</option>
+                <option *ngFor="let tipo of tiposResiduo" [value]="tipo.id">
+                  {{ tipo.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="frecuenciaDias">Frecuencia (días)</label>
+              <input id="frecuenciaDias" type="number" formControlName="frecuenciaDias" class="form-input" min="1">
+            </div>
+
+            <div class="form-group">
+              <label for="pesoMinimoKg">Peso Mínimo (kg)</label>
+              <input id="pesoMinimoKg" type="number" formControlName="pesoMinimoKg" class="form-input" min="0" step="0.1">
+            </div>
+
+            <div class="form-group">
+              <label for="pesoMaximoKg">Peso Máximo (kg)</label>
+              <input id="pesoMaximoKg" type="number" formControlName="pesoMaximoKg" class="form-input" min="1" step="0.1">
+            </div>
+
+            <div class="form-group">
+              <label for="horaInicio">Hora Inicio</label>
+              <input id="horaInicio" type="time" formControlName="horaInicio" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label for="horaFin">Hora Fin</label>
+              <input id="horaFin" type="time" formControlName="horaFin" class="form-input">
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="requiereValidacionFoto" class="form-checkbox">
+                <span class="checkbox-text">Requiere validación con foto</span>
+              </label>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="activa" class="form-checkbox">
+                <span class="checkbox-text">Configuración activa</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" (click)="toggleZonaForm()" class="secondary-button">Cancelar</button>
+            <button type="submit" [disabled]="!zonaForm.valid || loading" class="primary-button">
+              Crear Configuración
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Zonas List -->
+      <div class="data-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Localidad</th>
+              <th>Tipo de Residuo</th>
+              <th>Frecuencia</th>
+              <th>Peso (kg)</th>
+              <th>Horario</th>
+              <th>Validación Foto</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let zona of configuracionesZona">
+              <td>{{ zona.localidadNombre }}</td>
+              <td>{{ zona.tipoResiduoNombre }}</td>
+              <td>{{ zona.frecuenciaDias }} días</td>
+              <td>{{ zona.pesoMinimoKg }} - {{ zona.pesoMaximoKg }}</td>
+              <td>{{ zona.horaInicio }} - {{ zona.horaFin }}</td>
+              <td>
+                <span [class]="zona.requiereValidacionFoto ? 'status-badge active' : 'status-badge inactive'">
+                  {{ zona.requiereValidacionFoto ? 'Sí' : 'No' }}
+                </span>
+              </td>
+              <td>
+                <span [class]="zona.activa ? 'status-badge active' : 'status-badge inactive'">
+                  {{ zona.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reglas Tab -->
+    <div *ngIf="activeTab === 'reglas'" class="tab-content">
+      <div class="section-header">
+        <h2>Reglas de Validación</h2>
+        <button (click)="toggleReglaForm()" class="primary-button">
+          <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Nueva Regla
+        </button>
+      </div>
+
+      <!-- Regla Form -->
+      <div *ngIf="showReglaForm" class="form-container">
+        <form [formGroup]="reglaForm" (ngSubmit)="onSubmitRegla()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tipoResiduoIdRegla">Tipo de Residuo</label>
+              <select id="tipoResiduoIdRegla" formControlName="tipoResiduoId" class="form-select">
+                <option value="">Seleccionar tipo</option>
+                <option *ngFor="let tipo of tiposResiduo" [value]="tipo.id">
+                  {{ tipo.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="localidadIdRegla">Localidad (Opcional)</label>
+              <select id="localidadIdRegla" formControlName="localidadId" class="form-select">
+                <option value="">Todas las localidades</option>
+                <option *ngFor="let localidad of localidades" [value]="localidad.id">
+                  {{ localidad.nombre }} - {{ localidad.ciudad }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="descripcionRegla">Descripción de la Regla</label>
+              <textarea id="descripcionRegla" formControlName="descripcion" class="form-textarea" rows="3"
+                placeholder="Describe la regla de validación..."></textarea>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="activa" class="form-checkbox">
+                <span class="checkbox-text">Regla activa</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" (click)="cancelReglaEdit()" class="secondary-button">Cancelar</button>
+            <button type="submit" [disabled]="!reglaForm.valid || loading" class="primary-button">
+              {{ editingRegla ? 'Actualizar' : 'Crear' }} Regla
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Reglas List -->
+      <div class="data-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Tipo de Residuo</th>
+              <th>Localidad</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let regla of reglasValidacion">
+              <td>{{ getTipoResiduoNombre(regla.tipoResiduoId) }}</td>
+              <td>{{ regla.localidadId ? getLocalidadNombre(regla.localidadId) : 'Todas' }}</td>
+              <td>{{ regla.descripcion }}</td>
+              <td>
+                <span [class]="regla.activa ? 'status-badge active' : 'status-badge inactive'">
+                  {{ regla.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td>
+                <button (click)="editRegla(regla)" class="action-button edit">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

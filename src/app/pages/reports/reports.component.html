@@ -1,0 +1,256 @@
+<div class="reports-container">
+  <!-- Header -->
+  <div class="reports-header">
+    <div class="header-content">
+      <h1 class="reports-title">Reportes</h1>
+      <p class="reports-subtitle">Genera reportes detallados del sistema</p>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-card">
+      <h3 class="filters-title">Filtros de Reporte</h3>
+      
+      <div class="filters-grid">
+        <!-- Tipo de Reporte (Solo para admins y recolectores) -->
+        <div class="filter-group" *ngIf="isRecolector$ | async">
+          <label class="filter-label">Tipo de Reporte</label>
+          <select [(ngModel)]="tipoReporte" class="filter-select" (change)="limpiarFiltros()">
+            <option value="usuario">Por Usuario</option>
+            <option value="localidad">Por Localidad</option>
+          </select>
+        </div>
+
+        <!-- Usuario ID (Solo para admins) -->
+        <div class="filter-group" *ngIf="tipoReporte === 'usuario' && (isAdmin$ | async)">
+          <label class="filter-label">ID de Usuario</label>
+          <input 
+            type="number" 
+            [(ngModel)]="usuarioId" 
+            class="filter-input" 
+            placeholder="Ingrese ID del usuario"
+            min="1"
+          >
+        </div>
+
+        <!-- Localidad (Solo para admins y recolectores) -->
+        <div class="filter-group" *ngIf="tipoReporte === 'localidad' && (isRecolector$ | async)">
+          <label class="filter-label">Localidad</label>
+          <select [(ngModel)]="localidadId" class="filter-select">
+            <option value="">Seleccione una localidad</option>
+            <option *ngFor="let localidad of localidades" [value]="localidad.id">
+              {{ localidad.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Fecha Desde -->
+        <div class="filter-group">
+          <label class="filter-label">Fecha Desde</label>
+          <input 
+            type="date" 
+            [(ngModel)]="fechaDesde" 
+            class="filter-input"
+          >
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div class="filter-group">
+          <label class="filter-label">Fecha Hasta</label>
+          <input 
+            type="date" 
+            [(ngModel)]="fechaHasta" 
+            class="filter-input"
+          >
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <button 
+          (click)="generarReporte()" 
+          class="btn btn-primary"
+          [disabled]="loading"
+        >
+          <svg *ngIf="loading" class="btn-icon spinning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <svg *ngIf="!loading" class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          {{ loading ? 'Generando...' : 'Generar Reporte' }}
+        </button>
+        
+        <button (click)="limpiarFiltros()" class="btn btn-secondary">
+          Limpiar Filtros
+        </button>
+        
+        <button 
+          *ngIf="reporteUsuario && tipoReporte === 'usuario'" 
+          (click)="exportarReporte()" 
+          class="btn btn-success"
+        >
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          Exportar CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-container">
+    <div class="error-content">
+      <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Generando reporte...</p>
+  </div>
+
+  <!-- Reporte Usuario -->
+  <div *ngIf="reporteUsuario && !loading" class="report-content">
+    <div class="report-header">
+      <h2 class="report-title">Reporte de Usuario</h2>
+      <div class="user-info">
+        <h3>{{ reporteUsuario.usuario.nombre }}</h3>
+        <p>{{ reporteUsuario.usuario.email }} | {{ reporteUsuario.usuario.localidad }}</p>
+        <p>Registrado: {{ reporteUsuario.usuario.fechaRegistro | date:'medium' }}</p>
+      </div>
+    </div>
+
+    <!-- Métricas del Usuario -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <h4>Total Recolecciones</h4>
+        <p class="metric-value">{{ reporteUsuario.totalRecolecciones }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Peso Total (Kg)</h4>
+        <p class="metric-value">{{ reporteUsuario.pesoTotalKg | number:'1.2-2' }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Puntos Actuales</h4>
+        <p class="metric-value">{{ reporteUsuario.usuario.puntos }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Puntos Totales</h4>
+        <p class="metric-value">{{ reporteUsuario.puntosTotales }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Total Canjes</h4>
+        <p class="metric-value">{{ reporteUsuario.totalCanjes }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Puntos Canjeados</h4>
+        <p class="metric-value">{{ reporteUsuario.puntosCanjeados }}</p>
+      </div>
+    </div>
+
+    <!-- Recolecciones por Tipo -->
+    <div class="chart-section">
+      <h3>Recolecciones por Tipo de Residuo</h3>
+      <div class="residue-types">
+        <div *ngFor="let tipo of reporteUsuario.recoleccionesPorTipo" class="residue-item">
+          <div class="residue-info">
+            <span class="residue-name">{{ tipo.tipoResiduo }}</span>
+            <span class="residue-count">{{ tipo.cantidad }} recolecciones</span>
+          </div>
+          <div class="residue-details">
+            <span>{{ tipo.pesoTotal | number:'1.2-2' }} kg</span>
+            <span>{{ tipo.puntosTotal }} puntos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial Reciente -->
+    <div class="history-section">
+      <h3>Historial de Recolecciones Recientes</h3>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Subtipo</th>
+              <th>Peso (Kg)</th>
+              <th>Puntos</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let recoleccion of reporteUsuario.historialRecolecciones">
+              <td>{{ recoleccion.fecha | date:'short' }}</td>
+              <td>{{ recoleccion.tipoResiduo }}</td>
+              <td>{{ recoleccion.subtipo || '-' }}</td>
+              <td>{{ recoleccion.pesoKg != null ? (recoleccion.pesoKg | number:'1.2-2') : '-' }}</td>
+              <td>{{ recoleccion.puntosGanados }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-' + recoleccion.estado.toLowerCase()">
+                  {{ recoleccion.estado }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reporte Localidad -->
+  <div *ngIf="reporteLocalidad && !loading" class="report-content">
+    <div class="report-header">
+      <h2 class="report-title">Reporte de Localidad</h2>
+      <div class="location-info">
+        <h3>{{ reporteLocalidad.localidad.nombre }}</h3>
+        <p>{{ reporteLocalidad.localidad.ciudad }}, {{ reporteLocalidad.localidad.departamento }}</p>
+      </div>
+    </div>
+
+    <!-- Métricas de la Localidad -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <h4>Total Usuarios</h4>
+        <p class="metric-value">{{ reporteLocalidad.totalUsuarios }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Usuarios Activos</h4>
+        <p class="metric-value">{{ reporteLocalidad.usuariosActivos }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Total Recolecciones</h4>
+        <p class="metric-value">{{ reporteLocalidad.totalRecolecciones }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Peso Total (Kg)</h4>
+        <p class="metric-value">{{ reporteLocalidad.pesoTotalKg | number:'1.2-2' }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Puntos Totales</h4>
+        <p class="metric-value">{{ reporteLocalidad.puntosTotales }}</p>
+      </div>
+    </div>
+
+    <!-- Top Usuarios -->
+    <div class="ranking-section">
+      <h3>Top Usuarios por Puntos</h3>
+      <div class="ranking-list">
+        <div *ngFor="let usuario of reporteLocalidad.topUsuarios; let i = index" class="ranking-item">
+          <div class="ranking-position">{{ i + 1 }}</div>
+          <div class="ranking-info">
+            <span class="ranking-name">{{ usuario.nombre }}</span>
+            <span class="ranking-stats">{{ usuario.puntos }} puntos | {{ usuario.totalRecolecciones }} recolecciones</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
