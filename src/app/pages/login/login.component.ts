@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  styleUrls: ['./login.component.css'],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-md w-full space-y-8">
@@ -48,23 +49,47 @@ import { AuthService } from '../../services/auth.service';
                 </div>
               </div>
 
-              <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  formControlName="password"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-                  placeholder="••••••••"
-                >
-                <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" 
-                     class="text-red-500 text-sm mt-1">
-                  La contraseña es requerida
-                </div>
-              </div>
+         <div>
+  <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+    Contraseña
+  </label>
+
+  <div class="password-wrapper">
+    <input
+      id="password"
+      [type]="showPassword ? 'text' : 'password'"
+      formControlName="password"
+      class="password-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+      [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+      placeholder="••••••••"
+      autocomplete="current-password"
+    />
+
+    <button
+      type="button"
+      class="toggle"
+      (click)="togglePasswordVisibility($event)"
+      [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+    >
+      <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.683.07.21.07.429 0 .639C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M3 3l18 18M10.58 10.58A3 3 0 0013.42 13.42M9.88 9.88L7.05 7.05M6.26 6.26C4.34 7.58 2.88 9.38 2.04 11.68a1 1 0 000 .64C3.42 16.49 7.36 19 12 19c1.49 0 2.91-.26 4.2-.74M20.94 13.73c.43-.56.8-1.18 1.06-1.82a1 1 0 000-.64C20.58 7.51 16.64 5 12 5c-.9 0-1.78.09-2.62.26"/>
+      </svg>
+    </button>
+  </div>
+
+  <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="text-red-500 text-sm mt-1">
+    La contraseña es requerida
+  </div>
+</div>
+
+
 
               <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div class="flex">
@@ -127,29 +152,38 @@ export class LoginComponent {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
   }
 
- // src/app/pages/login/login.component.ts
-// ...
-onSubmit(): void {
-  if (this.loginForm.valid) {
-    this.isLoading = true;
-    this.errorMessage = '';
+  // src/app/pages/login/login.component.ts
+  // ...
+  onSubmit(): void {
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = '';
 
-    this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.router.navigate([this.returnUrl || '/dashboard']);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        // El BE suele devolver string plano ("Credenciales inválidas.") en error.error
-        this.errorMessage = (typeof error?.error === 'string')
-          ? error.error
-          : (error?.error?.message || 'Error de conexión. Intenta nuevamente.');
-      }
-    });
-  } else {
-    Object.values(this.loginForm.controls).forEach(c => c.markAsTouched());
+      this.authService.login(this.loginForm.value).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate([this.returnUrl || '/dashboard']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          // El BE suele devolver string plano ("Credenciales inválidas.") en error.error
+          this.errorMessage = (typeof error?.error === 'string')
+            ? error.error
+            : (error?.error?.message || 'Error de conexión. Intenta nuevamente.');
+        }
+      });
+    } else {
+      Object.values(this.loginForm.controls).forEach(c => c.markAsTouched());
+    }
   }
-}
+
+  // dentro de la clase LoginComponent
+  showPassword = false;
+
+  togglePasswordVisibility(e: MouseEvent) {
+    e.preventDefault();
+    this.showPassword = !this.showPassword;
+  }
+
 
 }

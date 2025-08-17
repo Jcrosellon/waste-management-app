@@ -55,11 +55,10 @@ export class ForgotPasswordComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true; this.message = ''; this.error = '';
     this.auth.forgotPassword(this.form.value.email!).subscribe({
-      next: (res) => {
+      next: () => {
         this.loading = false;
         this.message = 'Si el email existe, enviaremos un enlace para restablecer tu contraseña.';
-        const url: string = res?.resetUrl || '';
-        this.devToken = url.split('token=')[1] || '';  // 👈 extrae token para probar
+        this.devToken = ''; // opcional: quita el bloque del "Link de prueba"
       },
       error: (e) => {
         this.loading = false;
