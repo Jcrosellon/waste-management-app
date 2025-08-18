@@ -17,3 +17,19 @@
 .password-input {
   padding-right: 2.25rem !important; /* espacio para el ojo */
 }
+
+.login-submit-btn {
+  background-color: #16a34a !important;   /* eco-green-600 */
+  color: #fff !important;
+  border: none !important;                 /* quita borde negro heredado */
+}
+.login-submit-btn:hover {
+  background-color: #15803d !important;   /* eco-green-700 */
+}
+.login-submit-btn:disabled {
+  background-color: #16a34a !important;
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+
