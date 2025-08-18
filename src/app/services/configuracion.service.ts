@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import { HttpClient } from "@angular/common/http"
 import { Observable } from "rxjs"
 import { environment } from "../../environments/environment"
+import { map } from 'rxjs/operators';
 
 export interface ConfiguracionZona {
   id: number
@@ -73,12 +74,28 @@ export class ConfiguracionService {
     return this.http.put<void>(`${this.apiUrl}/reglas/${id}`, regla)
   }
 
-  // Datos auxiliares
-  getLocalidades(): Observable<Localidad[]> {
-    return this.http.get<Localidad[]>(`${environment.apiUrl}/Localidades`)
-  }
+ getLocalidades(): Observable<Localidad[]> {
+  return this.http.get<any>(`${environment.apiUrl}/Localidades`).pipe(
+    map(r => r?.data?.items ?? r?.items ?? r ?? []),
+    map((arr: any[]) => arr.map(l => ({
+      id: l.id ?? l.Id ?? l.localidadId,
+      nombre: l.nombre ?? l.name ?? 'Sin nombre',
+      ciudad: l.ciudad ?? l.city ?? '',
+      departamento: l.departamento ?? l.department ?? '',
+      activa: l.activa ?? l.active ?? true,
+    })))
+  );
+}
 
-  getTiposResiduo(): Observable<TipoResiduo[]> {
-    return this.http.get<TipoResiduo[]>(`${environment.apiUrl}/TiposResiduo`)
-  }
+getTiposResiduo(): Observable<TipoResiduo[]> {
+  return this.http.get<any>(`${environment.apiUrl}/TiposResiduo`).pipe(
+    map(r => r?.data?.items ?? r?.items ?? r ?? []),
+    map((arr: any[]) => arr.map(t => ({
+      id: t.id ?? t.Id ?? t.tipoResiduoId,
+      nombre: t.nombre ?? t.name ?? 'Sin nombre',
+      descripcion: t.descripcion ?? t.description ?? '',
+      activo: t.activo ?? t.active ?? true,
+    })))
+  );
+}
 }

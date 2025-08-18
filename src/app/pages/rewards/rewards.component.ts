@@ -60,13 +60,41 @@ export class RewardsComponent implements OnInit, OnDestroy {
     { id: "donaciones", name: "Donaciones" },
   ];
 
-  // 👇 tipa el array
   waysToEarn: WayToEarn[] = [
-    { action: "Recolección Orgánicos", points: 30, icon: "M4.318 ...", bgColor: "bg-green-500" },
-    { action: "Recolección Reciclables", points: 50, icon: "M4 4v5h.582 ...", bgColor: "bg-blue-500" },
-    { action: "Recolección Peligrosos", points: 100, icon: "M12 9v2 ...", bgColor: "bg-red-500" },
-    { action: "Referir Amigos", points: 200, icon: "M12 4.354 ...", bgColor: "bg-purple-500" },
-  ];
+  {
+    action: "Recolección Orgánicos",
+    points: 30,
+    // check-circle
+    icon:
+      "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z",
+    bgColor: "bg-green-500",
+  },
+  {
+    action: "Recolección Reciclables",
+    points: 50,
+    // clock
+    icon:
+      "M10 2a8 8 0 100 16 8 8 0 000-16zm.75 4.75a.75.75 0 00-1.5 0v4H7a.75.75 0 000 1.5h3.75a.75.75 0 00.75-.75V6.75z",
+    bgColor: "bg-blue-500",
+  },
+  {
+    action: "Recolección Peligrosos",
+    points: 100,
+    // exclamation-circle
+    icon:
+      "M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-10.5a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0V7.5zM10 15.75a1 1 0 100-2 1 1 0 000 2z",
+    bgColor: "bg-red-500",
+  },
+  {
+    action: "Referir Amigos",
+    points: 200,
+    // star (seguro y vistoso)
+    icon:
+      "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z",
+    bgColor: "bg-purple-500",
+  },
+];
+
 
   constructor(
     private authService: AuthService,

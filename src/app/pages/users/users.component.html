@@ -50,60 +50,54 @@
         </div>
 
         <div class="table-container" *ngIf="!loading">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Puntos</th>
-                        <th>Estado</th>
-                        <th>Fecha Registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let usuario of filteredUsuarios">
-                        <td>
-                            <div class="user-info">
-                                <div class="user-name">{{ usuario.nombre }}</div>
-                                <div class="user-phone" *ngIf="usuario.telefono">{{ usuario.telefono }}</div>
-                            </div>
-                        </td>
-                        <td>{{ usuario.email }}</td>
-                        <td>
-                            <span class="badge" [ngClass]="getRoleBadgeClass(usuario.rol)">
-                                {{ usuario.rol }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="points-display">{{ usuario.puntos }} pts</span>
-                        </td>
-                        <td>
-                            <span class="badge" [ngClass]="getStatusBadgeClass(usuario.activo)">
-                                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </td>
-                        <td>{{ usuario.fechaRegistro | date:'dd/MM/yyyy' }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-sm btn-secondary" (click)="editUser(usuario)"
-                                    title="Editar usuario">
-                                    Editar
-                                </button>
-                                <button class="btn btn-sm btn-danger" (click)="deactivateUser(usuario)"
-                                    [disabled]="!usuario.activo" title="Desactivar usuario">
-                                    Desactivar
-                                </button>
-                                <button *ngIf="!usuario.activo" class="btn btn-sm btn-success"
-                                    (click)="approveUser(usuario)" title="Aprobar usuario">
-                                    Aprobar
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+           <table class="data-table">
+  <thead>
+    <tr>
+      <th style="width:90px">ID</th> <!-- 👈 NUEVO -->
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Rol</th>
+      <th>Puntos</th>
+      <th>Estado</th>
+      <th>Fecha Registro</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let usuario of filteredUsuarios">
+      <td>
+        <span class="user-id" (click)="copyId(usuario.id)" title="Copiar ID">
+          {{ usuario.id }}
+        </span>
+      </td>
+      <td>
+        <div class="user-info">
+          <div class="user-name">{{ usuario.nombre }}</div>
+          <div class="user-phone" *ngIf="usuario.telefono">{{ usuario.telefono }}</div>
+        </div>
+      </td>
+      <td>{{ usuario.email }}</td>
+      <td>
+        <span class="badge" [ngClass]="getRoleBadgeClass(usuario.rol)">{{ usuario.rol }}</span>
+      </td>
+      <td><span class="points-display">{{ usuario.puntos }} pts</span></td>
+      <td>
+        <span class="badge" [ngClass]="getStatusBadgeClass(usuario.activo)">
+          {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+        </span>
+      </td>
+      <td>{{ usuario.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+      <td>
+        <div class="action-buttons">
+          <button class="btn btn-sm btn-secondary" (click)="editUser(usuario)" title="Editar usuario">Editar</button>
+          <button class="btn btn-sm btn-danger" (click)="deactivateUser(usuario)" [disabled]="!usuario.activo" title="Desactivar usuario">Desactivar</button>
+          <button *ngIf="!usuario.activo" class="btn btn-sm btn-success" (click)="approveUser(usuario)" title="Aprobar usuario">Aprobar</button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
         </div>
 
         <!-- Loading state -->

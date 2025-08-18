@@ -23,6 +23,7 @@ export class NotificationsComponent implements OnInit {
   filtroEstado = "Todos"
   loading = false
   error: string | null = null
+  verHistorial = false;
 
   // Para enviar notificaciones (solo admin)
   mostrarFormulario = false
@@ -55,25 +56,36 @@ export class NotificationsComponent implements OnInit {
     this.cargarNotificaciones()
   }
 
-  cargarNotificaciones(): void {
-    this.loading = true
-    this.error = null
+   toggleHistorial(): void {
+    this.verHistorial = !this.verHistorial;
+    this.cargarNotificaciones();
+  }
+
+   cargarNotificaciones(): void {
+    this.loading = true;
+    this.error = null;
 
     this.authService.currentUser$.subscribe((user) => {
-      if (user) {
-        this.notificacionesService.getNotificacionesUsuario(user.id).subscribe({
-          next: (notificaciones) => {
-            this.notificaciones = notificaciones
-            this.loading = false
-          },
-          error: (error) => {
-            this.error = "Error al cargar las notificaciones"
-            this.loading = false
-            console.error("Error:", error)
-          },
-        })
-      }
-    })
+      if (!user) { this.notificaciones = []; this.loading = false; return; }
+
+      const esAdmin = user.rol === "Administrador";
+
+      const fuente$ = (this.verHistorial && esAdmin)
+        ? this.notificacionesService.getHistorialNotificaciones() // 👈 todas
+        : this.notificacionesService.getNotificacionesUsuario(user.id); // 👈 del usuario
+
+      fuente$.subscribe({
+        next: (notificaciones) => {
+          this.notificaciones = notificaciones;
+          this.loading = false;
+        },
+        error: (error) => {
+          this.error = "Error al cargar las notificaciones";
+          this.loading = false;
+          console.error("Error:", error);
+        },
+      });
+    });
   }
 
   get notificacionesFiltradas(): Notificacion[] {

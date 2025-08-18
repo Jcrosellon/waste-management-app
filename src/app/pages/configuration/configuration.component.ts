@@ -9,7 +9,7 @@ import {
   TipoResiduo,
 } from "../../services/configuracion.service"
 import { AuthService } from "../../services/auth.service"
-import { Observable, map } from "rxjs"
+import { Observable, forkJoin, map } from "rxjs"
 
 @Component({
   selector: "app-configuration",
@@ -47,8 +47,8 @@ export class ConfigurationComponent implements OnInit {
     this.isAdmin$ = this.authService.currentUser$.pipe(map((user) => user?.rol === "Administrador"))
 
     this.zonaForm = this.fb.group({
-      localidadId: ["", Validators.required],
-      tipoResiduoId: ["", Validators.required],
+      localidadId: [null, Validators.required],
+      tipoResiduoId: [null, Validators.required],
       frecuenciaDias: [7, [Validators.required, Validators.min(1)]],
       pesoMinimoKg: [0, [Validators.required, Validators.min(0)]],
       pesoMaximoKg: [100, [Validators.required, Validators.min(1)]],
@@ -56,43 +56,48 @@ export class ConfigurationComponent implements OnInit {
       horaFin: ["18:00", Validators.required],
       requiereValidacionFoto: [false],
       activa: [true],
-    })
+    });
 
     this.reglaForm = this.fb.group({
-      tipoResiduoId: ["", Validators.required],
-      localidadId: [""],
+      tipoResiduoId: [null, Validators.required],
+      localidadId: [null],
       descripcion: ["", Validators.required],
       activa: [true],
-    })
+    });
+
   }
 
   ngOnInit(): void {
     this.loadData()
   }
 
-  loadData(): void {
-    this.loading = true
-    this.error = null
+loadData(): void {
+  this.loading = true;
+  this.error = null;
 
-    Promise.all([
-      this.configuracionService.getConfiguracionesZona().toPromise(),
-      this.configuracionService.getReglasValidacion().toPromise(),
-      this.configuracionService.getLocalidades().toPromise(),
-      this.configuracionService.getTiposResiduo().toPromise(),
-    ])
-      .then(([zonas, reglas, localidades, tipos]) => {
-        this.configuracionesZona = zonas || []
-        this.reglasValidacion = reglas || []
-        this.localidades = localidades || []
-        this.tiposResiduo = tipos || []
-        this.loading = false
-      })
-      .catch((error) => {
-        this.error = "Error al cargar la configuración"
-        this.loading = false
-        console.error("Error loading configuration:", error)
-      })
-  }
+  forkJoin({
+    zonas: this.configuracionService.getConfiguracionesZona(),
+    reglas: this.configuracionService.getReglasValidacion(),
+    localidades: this.configuracionService.getLocalidades(),
+    tipos: this.configuracionService.getTiposResiduo(),
+  }).subscribe({
+    next: ({ zonas, reglas, localidades, tipos }) => {
+      // Tus servicios YA normalizan Localidades/Tipos,
+      // así que puedes asignar directo:
+      this.configuracionesZona = zonas ?? [];
+      this.reglasValidacion = reglas ?? [];
+      this.localidades = localidades ?? [];
+      this.tiposResiduo = tipos ?? [];
+
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error("Error loading configuration:", err);
+      this.error = "Error al cargar la configuración";
+      this.loading = false;
+    },
+  });
+}
 
   setActiveTab(tab: "zonas" | "reglas"): void {
     this.activeTab = tab

@@ -1,15 +1,17 @@
 <div class="notifications-container">
   <!-- Header -->
-  <div class="page-header">
-    <h1 class="page-title">Notificaciones</h1>
-    <div class="header-actions" *ngIf="isAdmin$ | async">
-      <button 
-        class="btn btn-primary"
-        (click)="mostrarFormulario = !mostrarFormulario">
-        {{ mostrarFormulario ? 'Cancelar' : 'Enviar Notificación' }}
-      </button>
-    </div>
+ <div class="page-header">
+  <h1 class="page-title">Notificaciones</h1>
+  <div class="header-actions" *ngIf="isAdmin$ | async">
+    <button class="btn btn-secondary" (click)="toggleHistorial()">
+      {{ verHistorial ? 'Ver mis notificaciones' : 'Ver historial' }}
+    </button>
+    <button class="btn btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
+      {{ mostrarFormulario ? 'Cancelar' : 'Enviar Notificación' }}
+    </button>
   </div>
+</div>
+
 
   <!-- Formulario para enviar notificaciones (solo admin) -->
   <div class="notification-form" *ngIf="mostrarFormulario && (isAdmin$ | async)">

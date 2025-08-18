@@ -106,6 +106,18 @@ export class UsersComponent implements OnInit {
   });
 }
 
+copyId(id: number) {
+  if (navigator?.clipboard?.writeText) {
+    navigator.clipboard.writeText(String(id));
+    // feedback rápido (si prefieres, reemplázalo por un toast)
+    console.log(`ID ${id} copiado`);
+  } else {
+    // fallback simple
+    alert(`ID: ${id}`);
+  }
+}
+
+
 /** Util para convertir distintos formatos a Date o null */
 private normalizeDate(raw: any): Date | null {
   if (!raw && raw !== 0) return null;

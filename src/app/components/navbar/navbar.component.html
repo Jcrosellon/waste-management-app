@@ -35,9 +35,11 @@
         <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Dashboard</a>
 
         <ng-container *ngIf="user.rol === 'Usuario'">
-          <a routerLink="/schedule" routerLinkActive="active" class="nav-link">Programar</a>
-          <a routerLink="/rewards" routerLinkActive="active" class="nav-link">Recompensas</a>
-        </ng-container>
+  <a routerLink="/schedule" routerLinkActive="active" class="nav-link">Programar</a>
+  <a routerLink="/rewards" routerLinkActive="active" class="nav-link">Recompensas</a>
+  <a routerLink="/notifications" routerLinkActive="active" class="nav-link">Notificaciones</a>
+</ng-container>
+
 
         <ng-container *ngIf="user.rol === 'Recolector' || user.rol === 'Administrador'">
           <a routerLink="/reports" routerLinkActive="active" class="nav-link">Reportes</a>
@@ -130,9 +132,11 @@
         <a routerLink="/dashboard" class="nav-link block">Dashboard</a>
 
         <ng-container *ngIf="user?.rol === 'Usuario'">
-          <a routerLink="/schedule" class="nav-link block">Programar</a>
-          <a routerLink="/rewards" class="nav-link block">Recompensas</a>
-        </ng-container>
+  <a routerLink="/schedule" class="nav-link block">Programar</a>
+  <a routerLink="/rewards" class="nav-link block">Recompensas</a>
+  <a routerLink="/notifications" class="nav-link block">Notificaciones</a>
+</ng-container>
+
 
         <ng-container *ngIf="user?.rol === 'Recolector' || user?.rol === 'Administrador'">
           <a routerLink="/reports" class="nav-link block">Reportes</a>
